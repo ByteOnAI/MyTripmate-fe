@@ -1,51 +1,62 @@
-import { useState, useRef, useEffect } from 'react';
-import { Send, Mic, Paperclip, Sparkles, LogOut, User } from 'lucide-react';
-import LoginModal from '@/components/LoginModal';
-import { sendChatMessage, ChatMessage } from '@/services/chatApi';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState, useRef, useEffect } from "react";
+import { Send, Mic, Paperclip, Sparkles, LogOut, User } from "lucide-react";
+import LoginModal from "@/components/LoginModal";
+import { sendChatMessage, ChatMessage } from "@/services/chatApi";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Chatbot = () => {
   const { user, isLoading: authLoading, signOut } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
-      id: '1',
-      text: 'Hi! I\'m your AI Travel Assistant. Ready to plan your perfect vacation? ✈️',
-      sender: 'bot',
-      timestamp: new Date().toLocaleString('en-GB', { 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit' 
-      }).replace(',', '')
+      id: "1",
+      text: "Hi! I'm your AI Travel Assistant. Ready to plan your perfect vacation? ✈️",
+      sender: "bot",
+      timestamp: new Date()
+        .toLocaleString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        })
+        .replace(",", ""),
     },
     {
-      id: '2',
-      text: 'I can help you plan everything from start to finish:\n\n✨ Discuss your dream destination\n🏨 Find perfect hotels & resorts\n✈️ Book flights & transport\n💰 Complete payments\n📋 Get instant confirmations\n\nLet\'s start planning your next adventure!',
-      sender: 'bot',
-      timestamp: new Date().toLocaleString('en-GB', { 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit' 
-      }).replace(',', ''),
-      buttons: ['Plan a Vacation', 'Find Hotels', 'Book Flights', 'My Bookings']
-    }
+      id: "2",
+      text: "I can help you plan everything from start to finish:\n\n✨ Discuss your dream destination\n🏨 Find perfect hotels & resorts\n✈️ Book flights & transport\n💰 Complete payments\n📋 Get instant confirmations\n\nLet's start planning your next adventure!",
+      sender: "bot",
+      timestamp: new Date()
+        .toLocaleString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        })
+        .replace(",", ""),
+      buttons: [
+        "Plan a Vacation",
+        "Find Hotels",
+        "Book Flights",
+        "My Bookings",
+      ],
+    },
   ]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(!user && !authLoading);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(
+    !user && !authLoading
+  );
   const [isTyping, setIsTyping] = useState(false);
-  const [typingText, setTypingText] = useState('');
+  const [typingText, setTypingText] = useState("");
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -72,38 +83,40 @@ const Chatbot = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (showProfileMenu && !target.closest('.profile-menu-container')) {
+      if (showProfileMenu && !target.closest(".profile-menu-container")) {
         setShowProfileMenu(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showProfileMenu]);
 
   const formatTimestamp = () => {
-    return new Date().toLocaleString('en-GB', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      second: '2-digit' 
-    }).replace(',', '');
+    return new Date()
+      .toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      })
+      .replace(",", "");
   };
 
   // Word-by-word typing animation
   const typeMessage = (fullText: string, buttons?: string[]) => {
-    const words = fullText.split(' ');
+    const words = fullText.split(" ");
     let currentIndex = 0;
-    let currentText = '';
+    let currentText = "";
 
-    setTypingText('');
+    setTypingText("");
     setIsTyping(true);
 
     typingIntervalRef.current = setInterval(() => {
       if (currentIndex < words.length) {
-        currentText += (currentIndex > 0 ? ' ' : '') + words[currentIndex];
+        currentText += (currentIndex > 0 ? " " : "") + words[currentIndex];
         setTypingText(currentText);
         currentIndex++;
       } else {
@@ -111,18 +124,18 @@ const Chatbot = () => {
         if (typingIntervalRef.current) {
           clearInterval(typingIntervalRef.current);
         }
-        
+
         const botMessage: ChatMessage = {
           id: Date.now().toString(),
           text: fullText,
-          sender: 'bot',
+          sender: "bot",
           timestamp: formatTimestamp(),
-          buttons: buttons
+          buttons: buttons,
         };
 
-        setMessages(prev => [...prev, botMessage]);
+        setMessages((prev) => [...prev, botMessage]);
         setIsTyping(false);
-        setTypingText('');
+        setTypingText("");
       }
     }, 100); // Adjust speed here (100ms per word)
   };
@@ -141,27 +154,27 @@ const Chatbot = () => {
     if (typingIntervalRef.current) {
       clearInterval(typingIntervalRef.current);
       setIsTyping(false);
-      setTypingText('');
+      setTypingText("");
     }
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       text: textToSend,
-      sender: 'user',
-      timestamp: formatTimestamp()
+      sender: "user",
+      timestamp: formatTimestamp(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
+    setMessages((prev) => [...prev, userMessage]);
+    setInputMessage("");
 
     // Get bot response from API
     try {
       const response = await sendChatMessage(textToSend);
-      
+
       // Start word-by-word typing animation
       typeMessage(response.message, response.buttons);
     } catch (error) {
-      console.error('Chat error:', error);
+      console.error("Chat error:", error);
       typeMessage("I'm having trouble connecting. Please try again.");
     } finally {
       inputRef.current?.focus();
@@ -169,7 +182,7 @@ const Chatbot = () => {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -192,11 +205,27 @@ const Chatbot = () => {
       <div className="relative bg-gradient-to-r from-[#4c9ce4] via-[#5eb5e8] to-[#68c8ed] text-white px-6 py-5 shadow-2xl z-10">
         <div className="absolute inset-0 overflow-hidden">
           {/* Animated wave effect - transparent only */}
-          <svg className="absolute bottom-0 left-0 w-full h-24 animate-wave" viewBox="0 0 1440 120" preserveAspectRatio="none">
-            <path d="M0,60 Q360,120 720,60 T1440,60 L1440,120 L0,120 Z" fill="white" opacity="0.15"/>
+          <svg
+            className="absolute bottom-0 left-0 w-full h-24 animate-wave"
+            viewBox="0 0 1440 120"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0,60 Q360,120 720,60 T1440,60 L1440,120 L0,120 Z"
+              fill="white"
+              opacity="0.15"
+            />
           </svg>
-          <svg className="absolute bottom-0 left-0 w-full h-20 animate-wave-slow" viewBox="0 0 1440 100" preserveAspectRatio="none">
-            <path d="M0,50 Q360,100 720,50 T1440,50 L1440,100 L0,100 Z" fill="white" opacity="0.2"/>
+          <svg
+            className="absolute bottom-0 left-0 w-full h-20 animate-wave-slow"
+            viewBox="0 0 1440 100"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0,50 Q360,100 720,50 T1440,50 L1440,100 L0,100 Z"
+              fill="white"
+              opacity="0.2"
+            />
           </svg>
           {/* Sparkle effects */}
           <div className="absolute top-2 right-20 text-white/30 animate-pulse">
@@ -206,25 +235,28 @@ const Chatbot = () => {
             <Sparkles className="w-3 h-3" />
           </div>
         </div>
-        
+
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-4 animate-fade-in">
             <div className="relative w-16 h-16 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center overflow-visible border-3 border-white/40 shadow-xl transform hover:scale-105 transition-transform">
               <div className="w-full h-full rounded-full overflow-hidden">
-                <img 
-                  src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='35' r='18' fill='%23d4a574'/%3E%3Cpath d='M25 85 Q25 55 50 55 Q75 55 75 85' fill='%23a8d8ea'/%3E%3Cpath d='M30 50 Q30 45 35 45 L65 45 Q70 45 70 50' fill='%23d4a574'/%3E%3Ccircle cx='38' cy='32' r='2' fill='%23333'/%3E%3Ccircle cx='62' cy='32' r='2' fill='%23333'/%3E%3Cpath d='M42 40 Q50 43 58 40' stroke='%23333' fill='none' stroke-width='1.5'/%3E%3Cpath d='M32 28 Q30 25 28 28' stroke='%238b4513' fill='none' stroke-width='2'/%3E%3Cpath d='M68 28 Q70 25 72 28' stroke='%238b4513' fill='none' stroke-width='2'/%3E%3C/svg%3E" 
-                  alt="Virtual Agent" 
+                <img
+                  src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='35' r='18' fill='%23d4a574'/%3E%3Cpath d='M25 85 Q25 55 50 55 Q75 55 75 85' fill='%23a8d8ea'/%3E%3Cpath d='M30 50 Q30 45 35 45 L65 45 Q70 45 70 50' fill='%23d4a574'/%3E%3Ccircle cx='38' cy='32' r='2' fill='%23333'/%3E%3Ccircle cx='62' cy='32' r='2' fill='%23333'/%3E%3Cpath d='M42 40 Q50 43 58 40' stroke='%23333' fill='none' stroke-width='1.5'/%3E%3Cpath d='M32 28 Q30 25 28 28' stroke='%238b4513' fill='none' stroke-width='2'/%3E%3Cpath d='M68 28 Q70 25 72 28' stroke='%238b4513' fill='none' stroke-width='2'/%3E%3C/svg%3E"
+                  alt="Virtual Agent"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-wide drop-shadow-lg">EaseMyTrip AI Travel Planner</h1>
-              <p className="text-sm text-white/90 font-medium mt-0.5">Your personal assistant for seamless vacation planning 🌴</p>
+              <h1 className="text-2xl font-bold tracking-wide drop-shadow-lg">
+                MyTripMate
+              </h1>
+              <p className="text-sm text-white/90 font-medium mt-0.5">
+                Your personal assistant for seamless vacation planning 🌴
+              </p>
             </div>
           </div>
-          
         </div>
 
         {/* Login/Profile Button */}
@@ -237,18 +269,20 @@ const Chatbot = () => {
                 className="flex items-center gap-3 px-4 py-2 bg-white hover:bg-gray-50 rounded-full shadow-xl transition-all transform hover:scale-105"
               >
                 {user.user_metadata?.avatar_url ? (
-                  <img 
-                    src={user.user_metadata.avatar_url} 
+                  <img
+                    src={user.user_metadata.avatar_url}
                     alt={user.user_metadata?.full_name || user.email}
                     className="w-8 h-8 rounded-full border-2 border-blue-400"
                   />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#4c9ce4] to-[#5eb5e8] flex items-center justify-center text-white font-semibold">
-                    {user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U'}
+                    {user.user_metadata?.full_name?.[0] ||
+                      user.email?.[0] ||
+                      "U"}
                   </div>
                 )}
                 <span className="text-gray-800 font-medium text-sm max-w-[120px] truncate">
-                  {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                  {user.user_metadata?.full_name || user.email?.split("@")[0]}
                 </span>
               </button>
 
@@ -257,9 +291,11 @@ const Chatbot = () => {
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden animate-slide-down">
                   <div className="px-4 py-3 border-b border-gray-100">
                     <p className="text-sm font-semibold text-gray-900">
-                      {user.user_metadata?.full_name || 'User'}
+                      {user.user_metadata?.full_name || "User"}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {user.email}
+                    </p>
                   </div>
                   <button
                     onClick={async () => {
@@ -278,7 +314,7 @@ const Chatbot = () => {
             // Login Button
             <button
               onClick={() => {
-                console.log('Login button clicked!');
+                console.log("Login button clicked!");
                 setIsLoginModalOpen(true);
               }}
               className="px-7 py-3 bg-white text-[#4c9ce4] hover:bg-gray-50 rounded-full font-semibold shadow-xl transition-all text-sm transform hover:scale-105 hover:shadow-2xl cursor-pointer"
@@ -293,13 +329,13 @@ const Chatbot = () => {
       <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6 relative z-0">
         {messages.map((message) => (
           <div key={message.id} className="space-y-2 animate-slide-up">
-            {message.sender === 'bot' ? (
+            {message.sender === "bot" ? (
               <div className="flex items-start gap-3 max-w-4xl">
                 <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex-shrink-0 flex items-center justify-center overflow-visible shadow-lg border-2 border-blue-200">
                   <div className="w-full h-full rounded-full overflow-hidden">
-                    <img 
-                      src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='35' r='18' fill='%23d4a574'/%3E%3Cpath d='M25 85 Q25 55 50 55 Q75 55 75 85' fill='%23a8d8ea'/%3E%3Cpath d='M30 50 Q30 45 35 45 L65 45 Q70 45 70 50' fill='%23d4a574'/%3E%3Ccircle cx='38' cy='32' r='2' fill='%23333'/%3E%3Ccircle cx='62' cy='32' r='2' fill='%23333'/%3E%3Cpath d='M42 40 Q50 43 58 40' stroke='%23333' fill='none' stroke-width='1.5'/%3E%3Cpath d='M32 28 Q30 25 28 28' stroke='%238b4513' fill='none' stroke-width='2'/%3E%3Cpath d='M68 28 Q70 25 72 28' stroke='%238b4513' fill='none' stroke-width='2'/%3E%3C/svg%3E" 
-                      alt="Agent" 
+                    <img
+                      src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='35' r='18' fill='%23d4a574'/%3E%3Cpath d='M25 85 Q25 55 50 55 Q75 55 75 85' fill='%23a8d8ea'/%3E%3Cpath d='M30 50 Q30 45 35 45 L65 45 Q70 45 70 50' fill='%23d4a574'/%3E%3Ccircle cx='38' cy='32' r='2' fill='%23333'/%3E%3Ccircle cx='62' cy='32' r='2' fill='%23333'/%3E%3Cpath d='M42 40 Q50 43 58 40' stroke='%23333' fill='none' stroke-width='1.5'/%3E%3Cpath d='M32 28 Q30 25 28 28' stroke='%238b4513' fill='none' stroke-width='2'/%3E%3Cpath d='M68 28 Q70 25 72 28' stroke='%238b4513' fill='none' stroke-width='2'/%3E%3C/svg%3E"
+                      alt="Agent"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -311,8 +347,10 @@ const Chatbot = () => {
                       {message.text}
                     </p>
                   </div>
-                  <p className="text-xs text-gray-400 mt-2 ml-2 font-medium">{message.timestamp}</p>
-                  
+                  <p className="text-xs text-gray-400 mt-2 ml-2 font-medium">
+                    {message.timestamp}
+                  </p>
+
                   {message.buttons && (
                     <div className="flex flex-wrap gap-3 mt-5">
                       {message.buttons.map((button, idx) => (
@@ -334,26 +372,37 @@ const Chatbot = () => {
                   <div className="bg-gradient-to-r from-[#4c9ce4] to-[#5eb5e8] text-white rounded-2xl rounded-tr-sm px-6 py-4 shadow-lg max-w-2xl transform hover:scale-[1.01] transition-transform">
                     <p className="text-base leading-relaxed">{message.text}</p>
                   </div>
-                  <p className="text-xs text-gray-400 mt-2 mr-2 font-medium">{message.timestamp}</p>
+                  <p className="text-xs text-gray-400 mt-2 mr-2 font-medium">
+                    {message.timestamp}
+                  </p>
                 </div>
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#4c9ce4] to-[#5eb5e8] flex-shrink-0 flex items-center justify-center text-white font-semibold shadow-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                    <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-6 h-6"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
               </div>
             )}
           </div>
         ))}
-        
+
         {/* Typing Indicator - Word by word */}
         {isTyping && (
           <div className="flex items-start gap-3 animate-slide-up">
             <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex-shrink-0 flex items-center justify-center overflow-visible shadow-lg border-2 border-blue-200">
               <div className="w-full h-full rounded-full overflow-hidden">
-                <img 
-                  src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='35' r='18' fill='%23d4a574'/%3E%3Cpath d='M25 85 Q25 55 50 55 Q75 55 75 85' fill='%23a8d8ea'/%3E%3Cpath d='M30 50 Q30 45 35 45 L65 45 Q70 45 70 50' fill='%23d4a574'/%3E%3Ccircle cx='38' cy='32' r='2' fill='%23333'/%3E%3Ccircle cx='62' cy='32' r='2' fill='%23333'/%3E%3Cpath d='M42 40 Q50 43 58 40' stroke='%23333' fill='none' stroke-width='1.5'/%3E%3C/svg%3E" 
-                  alt="Agent" 
+                <img
+                  src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='35' r='18' fill='%23d4a574'/%3E%3Cpath d='M25 85 Q25 55 50 55 Q75 55 75 85' fill='%23a8d8ea'/%3E%3Cpath d='M30 50 Q30 45 35 45 L65 45 Q70 45 70 50' fill='%23d4a574'/%3E%3Ccircle cx='38' cy='32' r='2' fill='%23333'/%3E%3Ccircle cx='62' cy='32' r='2' fill='%23333'/%3E%3Cpath d='M42 40 Q50 43 58 40' stroke='%23333' fill='none' stroke-width='1.5'/%3E%3C/svg%3E"
+                  alt="Agent"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -390,7 +439,11 @@ const Chatbot = () => {
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={user ? "Tell me about your dream vacation..." : "Please login to start planning your trip..."}
+              placeholder={
+                user
+                  ? "Tell me about your dream vacation..."
+                  : "Please login to start planning your trip..."
+              }
               disabled={!user}
               className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder-gray-400 text-base font-medium disabled:cursor-not-allowed"
             />
@@ -412,8 +465,11 @@ const Chatbot = () => {
       </div>
 
       {/* Login Modal */}
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
-      
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
+
       {/* Custom Styles */}
       <style>{`
         @keyframes slide-up {

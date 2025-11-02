@@ -1,11 +1,12 @@
-# 🤖 EaseMyTrip Virtual Agent Chatbot
+# 🤖 MyTripMate Virtual Agent Chatbot
 
-A premium, high-performance chatbot interface built with React, TypeScript, and Tailwind CSS. Features an elegant design matching EaseMyTrip's brand identity with smooth animations and professional UX.
+A premium, high-performance chatbot interface built with React, TypeScript, and Tailwind CSS. Features an elegant design matching MyTripMate's brand identity with smooth animations and professional UX.
 
 ## ✨ Features
 
 ### 🎨 **Premium UI/UX**
-- **Exact EaseMyTrip brand colors** - Blue gradient (`#4c9ce4` → `#5eb5e8` → `#68c8ed`)
+
+- **Exact MyTripMate brand colors** - Blue gradient (`#4c9ce4` → `#5eb5e8` → `#68c8ed`)
 - **Smooth animations** - Fade-ins, slide-ups, blob effects, wave animations
 - **Responsive design** - Works perfectly on all screen sizes
 - **Beautiful avatars** - Custom SVG avatars for bot and user
@@ -13,6 +14,7 @@ A premium, high-performance chatbot interface built with React, TypeScript, and 
 - **Hover effects** - Interactive buttons and elements
 
 ### 💬 **Chat Features**
+
 - Real-time messaging interface
 - Quick action buttons (New Booking, Status Check, etc.)
 - Message timestamps
@@ -21,6 +23,7 @@ A premium, high-performance chatbot interface built with React, TypeScript, and 
 - Mock API with intelligent responses
 
 ### 🔐 **Authentication**
+
 - Beautiful login modal with carousel
 - Email/Mobile input
 - Social login (Google & Facebook)
@@ -28,6 +31,7 @@ A premium, high-performance chatbot interface built with React, TypeScript, and 
 - Terms and privacy policy links
 
 ### 🚀 **Performance**
+
 - Fast load times with Vite
 - Optimized React components
 - Lazy loading where appropriate
@@ -50,7 +54,7 @@ src/
 └── index.css               # Global styles & design tokens
 
 public/
-└── favicon.svg             # EaseMyTrip branded favicon
+└── favicon.svg             # MyTripMate branded favicon
 ```
 
 ## 🛠️ Tech Stack
@@ -92,7 +96,7 @@ The app will run on `http://localhost:8080` (or next available port)
 The chatbot currently uses a **mock API** with intelligent responses. The mock API is located in:
 
 ```typescript
-src/services/chatApi.ts
+src / services / chatApi.ts;
 ```
 
 ### Switching to Real API
@@ -106,30 +110,32 @@ To integrate your real API, follow these steps:
 3. **Configure** your API endpoint and authentication:
 
 ```typescript
-export const realChatAPI = async (userMessage: string): Promise<ChatAPIResponse> => {
+export const realChatAPI = async (
+  userMessage: string
+): Promise<ChatAPIResponse> => {
   try {
-    const response = await fetch('YOUR_API_ENDPOINT', {
-      method: 'POST',
+    const response = await fetch("YOUR_API_ENDPOINT", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${YOUR_API_KEY}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${YOUR_API_KEY}`,
       },
       body: JSON.stringify({
         message: userMessage,
         // Add other required fields
-      })
+      }),
     });
-    
+
     const data = await response.json();
-    
+
     return {
       message: data.message,
-      buttons: data.buttons // Optional quick action buttons
+      buttons: data.buttons, // Optional quick action buttons
     };
   } catch (error) {
-    console.error('Chat API Error:', error);
+    console.error("Chat API Error:", error);
     return {
-      message: "I'm having trouble connecting. Please try again."
+      message: "I'm having trouble connecting. Please try again.",
     };
   }
 };
@@ -152,7 +158,7 @@ Your API should return JSON in this format:
 ```json
 {
   "message": "Response text here",
-  "buttons": ["Button 1", "Button 2"]  // Optional
+  "buttons": ["Button 1", "Button 2"] // Optional
 }
 ```
 
@@ -161,8 +167,8 @@ Your API should return JSON in this format:
 Brand colors are defined in `src/index.css`:
 
 ```css
---primary: 207 89% 46%;           /* #4c9ce4 */
---primary-light: 207 90% 61%;     /* #5eb5e8 */
+--primary: 207 89% 46%; /* #4c9ce4 */
+--primary-light: 207 90% 61%; /* #5eb5e8 */
 --gradient-header: linear-gradient(135deg, ...);
 ```
 
@@ -186,11 +192,11 @@ Edit `src/pages/Chatbot.tsx` - look for the initial `messages` state:
 ```typescript
 const [messages, setMessages] = useState<ChatMessage[]>([
   {
-    id: '1',
-    text: 'Your welcome message here',
-    sender: 'bot',
-    timestamp: formatTimestamp()
-  }
+    id: "1",
+    text: "Your welcome message here",
+    sender: "bot",
+    timestamp: formatTimestamp(),
+  },
 ]);
 ```
 
@@ -199,7 +205,7 @@ const [messages, setMessages] = useState<ChatMessage[]>([
 Modify the `buttons` array in initial messages or API responses:
 
 ```typescript
-buttons: ['New Booking', 'Status Check', 'Help', 'Cancel']
+buttons: ["New Booking", "Status Check", "Help", "Cancel"];
 ```
 
 ## 📱 Features Breakdown
@@ -270,7 +276,7 @@ const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT;
 interface ChatMessage {
   id: string;
   text: string;
-  sender: 'user' | 'bot';
+  sender: "user" | "bot";
   timestamp: string;
   buttons?: string[];
 }
@@ -295,11 +301,12 @@ interface ChatAPIResponse {
 
 ## 📄 License
 
-This project is built for EaseMyTrip.
+This project is built for MyTripMate.
 
 ## 🤝 Support
 
 For issues or questions:
+
 1. Check the code comments
 2. Review the API integration guide above
 3. Test with mock API first before integrating real API
@@ -307,6 +314,7 @@ For issues or questions:
 ## 🎉 Credits
 
 Built with ❤️ using modern web technologies:
+
 - React Team for React
 - Vercel for Next.js inspiration
 - shadcn for beautiful components
