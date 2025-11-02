@@ -162,12 +162,12 @@ const Chatbot = () => {
       {/* Header */}
       <div className="relative bg-gradient-to-r from-[#4c9ce4] via-[#5eb5e8] to-[#68c8ed] text-white px-6 py-5 shadow-2xl z-10">
         <div className="absolute inset-0 overflow-hidden">
-          {/* Animated wave effect */}
+          {/* Animated wave effect - transparent only */}
           <svg className="absolute bottom-0 left-0 w-full h-24 animate-wave" viewBox="0 0 1440 120" preserveAspectRatio="none">
             <path d="M0,60 Q360,120 720,60 T1440,60 L1440,120 L0,120 Z" fill="white" opacity="0.15"/>
           </svg>
           <svg className="absolute bottom-0 left-0 w-full h-20 animate-wave-slow" viewBox="0 0 1440 100" preserveAspectRatio="none">
-            <path d="M0,50 Q360,100 720,50 T1440,50 L1440,100 L0,100 Z" fill="white"/>
+            <path d="M0,50 Q360,100 720,50 T1440,50 L1440,100 L0,100 Z" fill="white" opacity="0.2"/>
           </svg>
           {/* Sparkle effects */}
           <div className="absolute top-2 right-20 text-white/30 animate-pulse">
@@ -199,10 +199,13 @@ const Chatbot = () => {
         </div>
 
         {/* Login Button */}
-        <div className="absolute top-5 right-6">
+        <div className="absolute top-5 right-6 z-20">
           <button
-            onClick={() => setIsLoginModalOpen(true)}
-            className="px-7 py-3 bg-white text-[#4c9ce4] hover:bg-gray-50 rounded-full font-semibold shadow-xl transition-all text-sm transform hover:scale-105 hover:shadow-2xl"
+            onClick={() => {
+              console.log('Login button clicked!');
+              setIsLoginModalOpen(true);
+            }}
+            className="px-7 py-3 bg-white text-[#4c9ce4] hover:bg-gray-50 rounded-full font-semibold shadow-xl transition-all text-sm transform hover:scale-105 hover:shadow-2xl cursor-pointer"
           >
             Login or Signup
           </button>

@@ -12,6 +12,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
+    console.log('LoginModal isOpen:', isOpen);
     if (isOpen) {
       setTimeout(() => setShowModal(true), 10);
     } else {
@@ -80,7 +81,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
   return (
     <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
+      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
         showModal ? 'opacity-100' : 'opacity-0'
       }`}
       onClick={handleClose}
@@ -169,7 +170,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
               <div className="flex-1 border-t-2 border-gray-200"></div>
             </div>
 
-            <div className="flex justify-center gap-6">
+            <div className="flex justify-center">
               <button
                 onClick={() => handleSocialLogin('Google')}
                 className="flex flex-col items-center gap-2 p-4 hover:bg-gray-50 rounded-2xl transition-all transform hover:scale-110 active:scale-95"
@@ -183,18 +184,6 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                   </svg>
                 </div>
                 <span className="text-sm text-gray-700 font-semibold">Google</span>
-              </button>
-
-              <button
-                onClick={() => handleSocialLogin('Facebook')}
-                className="flex flex-col items-center gap-2 p-4 hover:bg-gray-50 rounded-2xl transition-all transform hover:scale-110 active:scale-95"
-              >
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#1877F2] to-[#0c63d4] flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
-                  <svg viewBox="0 0 24 24" fill="white" className="w-7 h-7">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-700 font-semibold">Facebook</span>
               </button>
             </div>
 
