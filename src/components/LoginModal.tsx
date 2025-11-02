@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { X, Hotel, Plane, Ship } from 'lucide-react';
+import { X, Hotel, Plane, Ship, Loader2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import OTPModal from './OTPModal';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -7,9 +10,13 @@ interface LoginModalProps {
 }
 
 const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
+  const { signInWithOTP, signInWithGoogle, isLoading } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [email, setEmail] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOTPModalOpen, setIsOTPModalOpen] = useState(false);
+  const [verifyingContact, setVerifyingContact] = useState('');
 
   useEffect(() => {
     console.log('LoginModal isOpen:', isOpen);
@@ -50,21 +57,66 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     }
   ];
 
-  const handleContinue = () => {
-    if (!email.trim()) return;
-    console.log('Login with email:', email);
-    // Mock login - close modal after "success"
-    setTimeout(() => {
-      onClose();
-      setEmail('');
-    }, 500);
+  const handleContinue = async () => {
+    if (!email.trim()) {
+      toast.error('Please enter your email or mobile number');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Validate if it's an email
+      const isEmail = email.includes('@');
+      
+      if (!isEmail && !/^\d{10,}$/.test(email)) {
+        toast.error('Please enter a valid email or 10-digit mobile number');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { error } = await signInWithOTP(email);
+
+      if (error) {
+        toast.error(error.message || 'Failed to send OTP. Please try again.');
+      } else {
+        toast.success(`OTP sent to your ${isEmail ? 'email' : 'mobile'}!`, {
+          description: 'Please check and enter the OTP to continue.',
+        });
+        // Store the contact for OTP verification
+        setVerifyingContact(email);
+        // Close login modal and open OTP modal
+        handleClose();
+        setTimeout(() => {
+          setIsOTPModalOpen(true);
+        }, 300);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleSocialLogin = (provider: string) => {
-    console.log('Login with:', provider);
-    setTimeout(() => {
-      onClose();
-    }, 500);
+  const handleSocialLogin = async (provider: string) => {
+    if (provider.toLowerCase() === 'google') {
+      setIsSubmitting(true);
+      try {
+        const { error } = await signInWithGoogle();
+        
+        if (error) {
+          toast.error(error.message || 'Failed to sign in with Google');
+          setIsSubmitting(false);
+        } else {
+          // OAuth will redirect, so we don't need to do anything here
+          toast.success('Redirecting to Google...');
+        }
+      } catch (error) {
+        console.error('OAuth error:', error);
+        toast.error('An unexpected error occurred. Please try again.');
+        setIsSubmitting(false);
+      }
+    }
   };
 
   const handleClose = () => {
@@ -158,10 +210,17 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
             <button
               onClick={handleContinue}
-              disabled={!email.trim()}
-              className="w-full py-4 bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 disabled:from-gray-200 disabled:to-gray-300 text-gray-800 font-bold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg disabled:cursor-not-allowed disabled:transform-none"
+              disabled={!email.trim() || isSubmitting || isLoading}
+              className="w-full py-4 bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 disabled:from-gray-200 disabled:to-gray-300 text-gray-800 font-bold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
             >
-              Continue
+              {isSubmitting || isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Sending OTP...</span>
+                </>
+              ) : (
+                'Continue'
+              )}
             </button>
 
             <div className="relative flex items-center my-6">
@@ -214,6 +273,17 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           animation: fade-in 0.5s ease-out;
         }
       `}</style>
+
+      {/* OTP Verification Modal */}
+      <OTPModal
+        isOpen={isOTPModalOpen}
+        onClose={() => {
+          setIsOTPModalOpen(false);
+          setVerifyingContact('');
+          setEmail('');
+        }}
+        emailOrPhone={verifyingContact}
+      />
     </div>
   );
 };
