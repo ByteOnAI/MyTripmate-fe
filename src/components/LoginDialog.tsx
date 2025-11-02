@@ -6,9 +6,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LoginDialogProps {
   open: boolean;
@@ -31,20 +31,23 @@ const promoSlides = [
 ];
 
 export const LoginDialog = ({ open, onOpenChange }: LoginDialogProps) => {
-  const [email, setEmail] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const handleContinue = () => {
-    if (!email) {
-      toast.error("Please enter your email or mobile number");
-      return;
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Redirecting to Google...");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to sign in with Google");
     }
-    toast.success("Login functionality will be implemented soon!");
-    onOpenChange(false);
-  };
-
-  const handleSocialLogin = (provider: string) => {
-    toast.info(`${provider} login will be implemented soon!`);
   };
 
   return (
@@ -96,37 +99,17 @@ export const LoginDialog = ({ open, onOpenChange }: LoginDialogProps) => {
           </DialogHeader>
 
           <div className="space-y-4">
-            <Input
-              type="text"
-              placeholder="Email ID or Mobile Number"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-12 rounded-lg border-2 text-base"
-            />
-
-            <Button
-              onClick={handleContinue}
-              className="h-12 w-full rounded-full bg-muted text-muted-foreground hover:bg-muted/80"
-            >
-              Continue
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-background px-4 text-muted-foreground">
-                  Or Login Via
-                </span>
-              </div>
+            <div className="text-center mb-6">
+              <p className="text-sm text-muted-foreground">
+                Sign in to access your bookings and personalized recommendations
+              </p>
             </div>
 
             <div className="flex justify-center gap-6">
               <Button
                 variant="outline"
                 className="flex flex-col items-center gap-2 rounded-2xl border-2 px-8 py-4 hover:border-primary"
-                onClick={() => handleSocialLogin("Google")}
+                onClick={handleGoogleLogin}
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white">
                   <svg viewBox="0 0 24 24" className="h-8 w-8">
@@ -151,18 +134,6 @@ export const LoginDialog = ({ open, onOpenChange }: LoginDialogProps) => {
                 <span className="text-sm font-medium">Google</span>
               </Button>
 
-              <Button
-                variant="outline"
-                className="flex flex-col items-center gap-2 rounded-2xl border-2 px-8 py-4 hover:border-primary"
-                onClick={() => handleSocialLogin("Facebook")}
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1877F2]">
-                  <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                  </svg>
-                </div>
-                <span className="text-sm font-medium">Facebook</span>
-              </Button>
             </div>
 
             <p className="text-center text-xs text-muted-foreground">
