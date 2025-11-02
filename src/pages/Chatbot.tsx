@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Mic, Paperclip, Sparkles } from 'lucide-react';
+import { Send, Mic, Paperclip, Sparkles, LogOut, User } from 'lucide-react';
 import LoginModal from '@/components/LoginModal';
 import { sendChatMessage, ChatMessage } from '@/services/chatApi';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Chatbot = () => {
+  const { user, isLoading: authLoading, signOut } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      text: 'Hi! How can we help you?',
+      text: 'Hi! I\'m your AI Travel Assistant. Ready to plan your perfect vacation? ✈️',
       sender: 'bot',
       timestamp: new Date().toLocaleString('en-GB', { 
         day: '2-digit', 
@@ -20,7 +22,7 @@ const Chatbot = () => {
     },
     {
       id: '2',
-      text: 'Welcome to EaseMyTrip Support\nPlease message us below 👇',
+      text: 'I can help you plan everything from start to finish:\n\n✨ Discuss your dream destination\n🏨 Find perfect hotels & resorts\n✈️ Book flights & transport\n💰 Complete payments\n📋 Get instant confirmations\n\nLet\'s start planning your next adventure!',
       sender: 'bot',
       timestamp: new Date().toLocaleString('en-GB', { 
         day: '2-digit', 
@@ -30,13 +32,14 @@ const Chatbot = () => {
         minute: '2-digit', 
         second: '2-digit' 
       }).replace(',', ''),
-      buttons: ['New Booking', 'Booking Status', 'Download Ticket', 'Download Invoice']
+      buttons: ['Plan a Vacation', 'Find Hotels', 'Book Flights', 'My Bookings']
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(!user && !authLoading);
   const [isTyping, setIsTyping] = useState(false);
   const [typingText, setTypingText] = useState('');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -57,6 +60,26 @@ const Chatbot = () => {
       }
     };
   }, []);
+
+  // Show login modal if user is not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      setIsLoginModalOpen(true);
+    }
+  }, [user, authLoading]);
+
+  // Close profile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showProfileMenu && !target.closest('.profile-menu-container')) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showProfileMenu]);
 
   const formatTimestamp = () => {
     return new Date().toLocaleString('en-GB', { 
@@ -105,6 +128,12 @@ const Chatbot = () => {
   };
 
   const handleSendMessage = async (messageText?: string) => {
+    // Require authentication to send messages
+    if (!user) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
     const textToSend = messageText || inputMessage;
     if (!textToSend.trim()) return;
 
@@ -191,24 +220,72 @@ const Chatbot = () => {
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-wide drop-shadow-lg">EaseMyTrip Virtual Agent</h1>
-              <p className="text-sm text-white/90 font-medium mt-0.5">Always here to help you travel better ✈️</p>
+              <h1 className="text-2xl font-bold tracking-wide drop-shadow-lg">EaseMyTrip AI Travel Planner</h1>
+              <p className="text-sm text-white/90 font-medium mt-0.5">Your personal assistant for seamless vacation planning 🌴</p>
             </div>
           </div>
           
         </div>
 
-        {/* Login Button */}
+        {/* Login/Profile Button */}
         <div className="absolute top-5 right-6 z-20">
-          <button
-            onClick={() => {
-              console.log('Login button clicked!');
-              setIsLoginModalOpen(true);
-            }}
-            className="px-7 py-3 bg-white text-[#4c9ce4] hover:bg-gray-50 rounded-full font-semibold shadow-xl transition-all text-sm transform hover:scale-105 hover:shadow-2xl cursor-pointer"
-          >
-            Login or Signup
-          </button>
+          {user ? (
+            // User Profile Menu
+            <div className="relative profile-menu-container">
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="flex items-center gap-3 px-4 py-2 bg-white hover:bg-gray-50 rounded-full shadow-xl transition-all transform hover:scale-105"
+              >
+                {user.user_metadata?.avatar_url ? (
+                  <img 
+                    src={user.user_metadata.avatar_url} 
+                    alt={user.user_metadata?.full_name || user.email}
+                    className="w-8 h-8 rounded-full border-2 border-blue-400"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#4c9ce4] to-[#5eb5e8] flex items-center justify-center text-white font-semibold">
+                    {user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U'}
+                  </div>
+                )}
+                <span className="text-gray-800 font-medium text-sm max-w-[120px] truncate">
+                  {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                </span>
+              </button>
+
+              {/* Dropdown Menu */}
+              {showProfileMenu && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden animate-slide-down">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {user.user_metadata?.full_name || 'User'}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      setShowProfileMenu(false);
+                      await signOut();
+                    }}
+                    className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-center gap-2 text-red-600"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="text-sm font-medium">Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            // Login Button
+            <button
+              onClick={() => {
+                console.log('Login button clicked!');
+                setIsLoginModalOpen(true);
+              }}
+              className="px-7 py-3 bg-white text-[#4c9ce4] hover:bg-gray-50 rounded-full font-semibold shadow-xl transition-all text-sm transform hover:scale-105 hover:shadow-2xl cursor-pointer"
+            >
+              Login or Signup
+            </button>
+          )}
         </div>
       </div>
 
@@ -313,8 +390,9 @@ const Chatbot = () => {
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Write a message here..."
-              className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder-gray-400 text-base font-medium"
+              placeholder={user ? "Tell me about your dream vacation..." : "Please login to start planning your trip..."}
+              disabled={!user}
+              className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder-gray-400 text-base font-medium disabled:cursor-not-allowed"
             />
             <button className="text-gray-400 hover:text-blue-500 transition-colors transform hover:scale-110">
               <Mic className="w-6 h-6" />
@@ -325,7 +403,7 @@ const Chatbot = () => {
           </div>
           <button
             onClick={() => handleSendMessage()}
-            disabled={!inputMessage.trim()}
+            disabled={!user || !inputMessage.trim()}
             className="w-16 h-16 rounded-full bg-gradient-to-r from-[#4c9ce4] to-[#5eb5e8] hover:from-[#3d8fd4] hover:to-[#4da4d8] text-white flex items-center justify-center shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-110 active:scale-95"
           >
             <Send className="w-6 h-6" />
@@ -342,6 +420,17 @@ const Chatbot = () => {
           from {
             opacity: 0;
             transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes slide-down {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
           }
           to {
             opacity: 1;
@@ -376,6 +465,10 @@ const Chatbot = () => {
         
         .animate-slide-up {
           animation: slide-up 0.3s ease-out;
+        }
+        
+        .animate-slide-down {
+          animation: slide-down 0.2s ease-out;
         }
         
         .animate-fade-in {
